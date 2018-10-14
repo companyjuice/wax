@@ -1,3 +1,6 @@
+// TODO: inject for unit tests
+import createNodeTree from './nodeTree';
+
 /* I chose "cache" over "memoise" here,
  * as we don't cache by the inner
  * arguments. We just want to avoid
@@ -30,10 +33,10 @@ const getNodeFromTree = tree =>
         : undefined; // facilitates with default prop in destructuring
 
 const createAudioElement = (Component, props, ...children) =>
-    asCachedCreator((audioContext, nodeTree = []) => {
-        const mapResult = (result, i) =>
+    asCachedCreator((audioContext, nodeTree = createNodeTree()) => {
+        const mapResult = result =>
             result.isElementCreator
-                ? result(audioContext, nodeTree[i])
+                ? result(audioContext, nodeTree.createSubTree())
                 : result;
 
         /* we want to render children first so the nodes
@@ -41,13 +44,15 @@ const createAudioElement = (Component, props, ...children) =>
         const createChildren = children => children.map(mapResult);
         const existingNode = getNodeFromTree(nodeTree);
 
-        return mapResult(
-            Component({
-                children: createChildren(children),
-                audioContext,
-                node: existingNode,
-                ...props,
-            })
+        return nodeTree.add(
+            mapResult(
+                Component({
+                    children: createChildren(children),
+                    audioContext,
+                    node: existingNode,
+                    ...props,
+                })
+            )
         );
     });
 
