@@ -1,5 +1,5 @@
 const serialiseTree = tree =>
-    tree.getChildren().map(child => child.isSubTree ? serialiseTree(child) : child);
+    tree.children.map(child => child.isSubTree ? serialiseTree(child) : child);
 
 const createNodeTree = () => {
     let children = [];
@@ -11,7 +11,7 @@ const createNodeTree = () => {
             return this;
         },
 
-        getChildren() {
+        get children() {
             return [...children]; // TODO: perf?!
         },
 
